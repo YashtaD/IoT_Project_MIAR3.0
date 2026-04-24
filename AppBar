@@ -1,0 +1,32 @@
+import { Bell, User, Menu } from "lucide-react";
+
+interface AppBarProps {
+  onMenuToggle?: () => void;
+  showMenu?: boolean;
+}
+
+const AppBar = ({ onMenuToggle, showMenu }: AppBarProps) => (
+  <header className="sticky top-0 z-40 bg-card border-b border-border px-4 md:px-6 py-3 flex items-center justify-between shadow-sm">
+    <div className="flex items-center gap-3">
+      {showMenu && (
+        <button onClick={onMenuToggle} className="p-2 rounded-lg hover:bg-muted transition-colors md:hidden">
+          <Menu className="w-5 h-5 text-foreground" />
+        </button>
+      )}
+      <h1 className="text-lg md:text-xl font-bold text-foreground tracking-tight">🌿 MyFarmTracker</h1>
+    </div>
+    <div className="flex items-center gap-1">
+      <button className="p-2 rounded-lg hover:bg-muted transition-colors relative">
+        <Bell className="w-5 h-5 text-muted-foreground" />
+        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
+      </button>
+      <button className="p-2 rounded-lg hover:bg-muted transition-colors">
+        <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center">
+          <User className="w-4 h-4 text-secondary-foreground" />
+        </div>
+      </button>
+    </div>
+  </header>
+);
+
+export default AppBar;
