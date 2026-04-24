@@ -52,7 +52,7 @@ Prérequis
    npm install
 
 3. Créez un fichier .env à la racine du projet et ajoutez vos clés API :
-   '''env
+   ```env
    VITE_SUPABASE_PROJECT_ID=votre_supabase_project_id
    VITE_SUPABASE_PUBLISHABLE_KEY=votre_supabase_publishable_key
    VITE_SUPABASE_URL=votre_supabase_url
@@ -60,6 +60,6 @@ Prérequis
 
 
 5. Lancez l'application en mode développement :
-   '''bash
+   ```bash
    npm run dev
 
