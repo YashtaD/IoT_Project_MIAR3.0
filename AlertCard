@@ -3,7 +3,7 @@ import { AlertTriangle, Thermometer, Droplets, Wind } from "lucide-react";
 interface AlertCardProps {
   message: string;
   timestamp: string;
-  severity: "critical" | "warning";
+  severity: "critical" | "warning"; 
 }
 
 const getIcon = (message: string) => {
