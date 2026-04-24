@@ -1,0 +1,51 @@
+import dashIcon from "@/assets/nav-dashboard.png";
+import envIcon from "@/assets/nav-environment.png";
+import harvestIcon from "@/assets/nav-harvest.png";
+import pestIcon from "@/assets/nav-pest.png";
+import alertsIcon from "@/assets/nav-alerts.png";
+import reportsIcon from "@/assets/nav-reports.png";
+import settingsIcon from "@/assets/nav-settings.png";
+
+const tabs = [
+  { label: "Dashboard", icon: dashIcon },
+  { label: "Environment", icon: envIcon },
+  { label: "Harvest", icon: harvestIcon },
+  { label: "Pest", icon: pestIcon },
+  { label: "Alerts", icon: alertsIcon },
+  { label: "Reports", icon: reportsIcon },
+  { label: "Settings", icon: settingsIcon },
+];
+
+interface BottomNavProps {
+  active: number;
+  onChange: (i: number) => void;
+}
+
+const BottomNav = ({ active, onChange }: BottomNavProps) => (
+  <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:hidden">
+    <div className="grid grid-cols-7 h-14">
+      {tabs.map((tab, i) => {
+        const isActive = active === i;
+        return (
+          <button
+            key={tab.label}
+            onClick={() => onChange(i)}
+            className={`flex min-w-0 flex-col items-center justify-center gap-0.5 px-0.5 py-1 transition-all ${isActive ? "text-secondary" : "text-muted-foreground"}`}
+          >
+            <img
+              src={tab.icon}
+              alt={`${tab.label} icon`}
+              loading="lazy"
+              width={24}
+              height={24}
+              className={`w-6 h-6 object-contain shrink-0 transition-all ${isActive ? "scale-110 drop-shadow-md" : "opacity-70"}`}
+            />
+            <span className="text-[9px] font-medium leading-tight truncate max-w-full">{tab.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  </nav>
+);
+
+export default BottomNav;
