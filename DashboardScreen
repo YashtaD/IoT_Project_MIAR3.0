@@ -1,0 +1,330 @@
+import { useMemo } from "react";
+import {
+  Droplets,
+  Wind,
+  ChevronDown,
+  TrendingUp,
+  Activity,
+  Wifi,
+  WifiOff,
+  Zap,
+  CloudRain,
+  Sprout,
+  Leaf,
+  Timer,
+  BarChart3,
+  RefreshCw,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+  CartesianGrid,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import AlertCard from "@/components/AlertCard";
+import { Progress } from "@/components/ui/progress";
+import { useSimulatedData } from "@/hooks/useSimulatedData";
+import { useIsMobile } from "@/hooks/use-mobile";
+import WeatherForecast from "@/components/WeatherForecast";
+
+const zones = [
+  { id: "a", label: "Zone A: Tomatoes" },
+  { id: "b", label: "Zone B: Cucumbers" },
+  { id: "c", label: "Zone C: Lettuce" },
+];
+
+const alertBarData = [
+  { day: "Mon", critical: 2, warning: 3, resolved: 5 },
+  { day: "Tue", critical: 1, warning: 4, resolved: 6 },
+  { day: "Wed", critical: 3, warning: 2, resolved: 4 },
+  { day: "Thu", critical: 0, warning: 5, resolved: 7 },
+  { day: "Fri", critical: 2, warning: 1, resolved: 8 },
+  { day: "Sat", critical: 1, warning: 3, resolved: 5 },
+  { day: "Sun", critical: 3, warning: 2, resolved: 3 },
+];
+
+const alerts = [
+  { message: "High Temperature in Zone A", timestamp: "2 hours ago", severity: "critical" as const },
+  { message: "Humidity spike in Zone B", timestamp: "3 hours ago", severity: "warning" as const },
+  { message: "Low light in Zone C", timestamp: "5 hours ago", severity: "warning" as const },
+];
+
+const cropHealthData = [
+  { name: "Healthy", value: 72, color: "hsl(var(--gh-green))" },
+  { name: "Needs Attention", value: 18, color: "hsl(var(--gh-orange))" },
+  { name: "Critical", value: 10, color: "hsl(var(--gh-red))" },
+];
+
+const cropProgress = [
+  { crop: "Tomatoes", zone: "A", progress: 75, daysLeft: 18, health: "good" },
+  { crop: "Cucumbers", zone: "B", progress: 55, daysLeft: 32, health: "attention" },
+  { crop: "Lettuce", zone: "C", progress: 90, daysLeft: 7, health: "good" },
+];
+
+const quickActions = [
+  { label: "Run Irrigation", icon: Droplets, color: "bg-gh-blue-light", textColor: "text-gh-blue" },
+  { label: "Open Vents", icon: Wind, color: "bg-gh-teal-light", textColor: "text-secondary" },
+  { label: "Check Sensors", icon: Activity, color: "bg-gh-green-light", textColor: "text-primary" },
+  { label: "View Reports", icon: BarChart3, color: "bg-gh-purple-light", textColor: "text-gh-purple" },
+];
+
+const DashboardScreen = () => {
+  const { readings, trendData, isUpdating, refresh } = useSimulatedData(30000);
+  const isMobile = useIsMobile();
+
+  const impactStats = useMemo(
+    () => [
+      { label: "Water Saved", value: "32%", icon: Droplets, description: "vs. traditional irrigation" },
+      { label: "Yield Increase", value: "+18%", icon: TrendingUp, description: "this quarter vs. last" },
+      { label: "Energy Efficiency", value: "94%", icon: Zap, description: "solar panel utilization" },
+      { label: "Crop Uptime", value: "99.2%", icon: Timer, description: "system availability" },
+    ],
+    []
+  );
+
+  const systemStatus = useMemo(
+    () => [
+      {
+        name: "Sensors Online",
+        value: readings.sensorsOnline,
+        total: 26,
+        icon: Wifi,
+        status: readings.sensorsOnline >= 24 ? "operational" : "warning",
+      },
+      { name: "Actuators Active", value: 8, total: 8, icon: Zap, status: "operational" },
+      { name: "Network Latency", value: 12, total: 100, icon: Activity, status: "operational" },
+      {
+        name: "Sensors Offline",
+        value: 26 - readings.sensorsOnline,
+        total: 26,
+        icon: WifiOff,
+        status: readings.sensorsOnline < 24 ? "warning" : "operational",
+      },
+    ],
+    [readings.sensorsOnline]
+  );
+
+  const waterUsageData = useMemo(
+    () => [
+      { day: "Mon", usage: 320, target: 300 },
+      { day: "Tue", usage: 280, target: 300 },
+      { day: "Wed", usage: 310, target: 300 },
+      { day: "Thu", usage: 290, target: 300 },
+      { day: "Fri", usage: 340, target: 300 },
+      { day: "Sat", usage: 260, target: 300 },
+      { day: "Sun", usage: readings.waterUsedToday, target: 300 },
+    ],
+    [readings.waterUsedToday]
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">Welcome back, Farmer! 👋</h2>
+          <p className="text-sm text-muted-foreground mt-1">Here's your greenhouse overview for today</p>
+        </div>
+        <button
+          onClick={refresh}
+          className="shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg border border-border bg-card shadow-sm"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? "animate-spin" : ""}`} />
+          <span className="hidden sm:inline">Refresh</span>
+        </button>
+      </div>
+
+      <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+        <span className={`w-2 h-2 rounded-full ${isUpdating ? "bg-gh-orange animate-pulse" : "bg-gh-green animate-pulse"}`} />
+        <span>{isUpdating ? "Updating…" : "Live"}</span>
+        <span>· Last updated {readings.lastUpdated.toLocaleTimeString()}</span>
+        <span>· Auto-refresh every 30s</span>
+      </div>
+
+      <div className="relative w-full max-w-xs">
+        <select className="w-full appearance-none bg-card border border-border rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+          {zones.map((z) => (
+            <option key={z.id} value={z.id}>
+              {z.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+      </div>
+
+      <WeatherForecast />
+
+      <div className="grid grid-cols-2 gap-3">
+        {impactStats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <div key={stat.label} className="bg-card rounded-lg p-4 border border-border shadow-sm min-w-0">
+              <div className="flex items-center gap-2 mb-2 min-w-0">
+                <Icon className="w-4 h-4 text-secondary shrink-0" />
+                <span className="text-xs font-medium text-muted-foreground truncate">{stat.label}</span>
+              </div>
+              <p className="text-xl font-bold text-foreground">{stat.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{stat.description}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className={`bg-card rounded-lg p-4 md:p-5 border border-border shadow-sm transition-all duration-500 ${isUpdating ? "opacity-70" : "opacity-100"}`}>
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="w-4 h-4 text-secondary" />
+            <h3 className="text-sm font-semibold text-foreground">System Status</h3>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-gh-green-light text-gh-green font-semibold">
+              {readings.sensorsOnline >= 24 ? "All Systems Go" : "Degraded"}
+            </span>
+          </div>
+          <div className="space-y-3">
+            {systemStatus.map((s) => {
+              const Icon = s.icon;
+              return (
+                <div key={s.name} className="flex items-center gap-3 min-w-0">
+                  <Icon className={`w-4 h-4 shrink-0 ${s.status === "operational" ? "text-gh-green" : "text-gh-orange"}`} />
+                  <span className="text-sm text-foreground flex-1 min-w-0">{s.name}</span>
+                  <span className="text-sm font-bold text-foreground transition-all duration-500 shrink-0">{s.value}/{s.total}</span>
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${s.status === "operational" ? "bg-gh-green" : "bg-gh-orange"} animate-pulse`} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-card rounded-lg p-4 md:p-5 border border-border shadow-sm overflow-hidden">
+          <div className="flex items-center gap-2 mb-4">
+            <Sprout className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-semibold text-foreground">Crop Health Overview</h3>
+          </div>
+          <div className={`flex ${isMobile ? "flex-col" : "items-center"} gap-4`}>
+            <div className="w-full sm:w-auto flex justify-center">
+              <ResponsiveContainer width={120} height={120}>
+                <PieChart>
+                  <Pie data={cropHealthData} cx="50%" cy="50%" innerRadius={35} outerRadius={55} paddingAngle={3} dataKey="value">
+                    {cropHealthData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="space-y-2 flex-1 min-w-0">
+              {cropHealthData.map((item) => (
+                <div key={item.name} className="flex items-center gap-2 min-w-0">
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                  <span className="text-xs text-muted-foreground flex-1 min-w-0">{item.name}</span>
+                  <span className="text-sm font-bold text-foreground shrink-0">{item.value}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Crop Growth Progress</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {cropProgress.map((crop) => (
+            <div key={crop.crop} className="bg-card rounded-lg p-4 border border-border shadow-sm">
+              <div className="flex items-center justify-between mb-2 gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Leaf className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-semibold text-foreground truncate">{crop.crop}</span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium shrink-0">Zone {crop.zone}</span>
+              </div>
+              <Progress value={crop.progress} className="h-2.5 mb-2" />
+              <div className="flex justify-between gap-2 text-xs text-muted-foreground">
+                <span>{crop.progress}% complete</span>
+                <span>{crop.daysLeft} days left</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className={`bg-card rounded-lg p-4 md:p-5 border border-border shadow-sm transition-all duration-500 overflow-hidden ${isUpdating ? "opacity-70" : "opacity-100"}`}>
+          <h3 className="text-sm font-semibold text-foreground mb-4">Environmental Trends (24h)</h3>
+          <ResponsiveContainer width="100%" height={isMobile ? 190 : 220}>
+            <LineChart data={trendData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="time" tick={{ fontSize: isMobile ? 9 : 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <YAxis width={isMobile ? 28 : 36} tick={{ fontSize: isMobile ? 9 : 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+              {!isMobile && <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />}
+              <Line type="monotone" dataKey="temp" name="Temp (°C)" stroke="hsl(var(--gh-orange))" strokeWidth={2} dot={false} animationDuration={800} />
+              <Line type="monotone" dataKey="humidity" name="Humidity (%)" stroke="hsl(var(--gh-blue))" strokeWidth={2} dot={false} animationDuration={800} />
+              <Line type="monotone" dataKey="light" name="Light (lux)" stroke="hsl(var(--gh-yellow))" strokeWidth={2} dot={false} animationDuration={800} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className={`bg-card rounded-lg p-4 md:p-5 border border-border shadow-sm transition-all duration-500 overflow-hidden ${isUpdating ? "opacity-70" : "opacity-100"}`}>
+          <div className="flex items-center gap-2 mb-4">
+            <Droplets className="w-4 h-4 text-gh-blue" />
+            <h3 className="text-sm font-semibold text-foreground">Water Usage (L/day)</h3>
+          </div>
+          <ResponsiveContainer width="100%" height={isMobile ? 190 : 220}>
+            <AreaChart data={waterUsageData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="day" tick={{ fontSize: isMobile ? 9 : 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <YAxis width={isMobile ? 28 : 36} tick={{ fontSize: isMobile ? 9 : 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+              {!isMobile && <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />}
+              <Area type="monotone" dataKey="usage" name="Actual" stroke="hsl(var(--gh-blue))" fill="hsl(var(--gh-blue))" fillOpacity={0.15} strokeWidth={2} animationDuration={800} />
+              <Line type="monotone" dataKey="target" name="Target" stroke="hsl(var(--gh-teal))" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-lg p-4 md:p-5 border border-border shadow-sm overflow-hidden">
+        <h3 className="text-sm font-semibold text-foreground mb-4">Alerts Overview (7 days)</h3>
+        {isMobile && (
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground mb-3">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-gh-red" />Critical</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-gh-orange" />Warning</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-gh-green" />Resolved</span>
+          </div>
+        )}
+        <ResponsiveContainer width="100%" height={isMobile ? 190 : 200}>
+          <BarChart data={alertBarData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="day" tick={{ fontSize: isMobile ? 9 : 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis width={isMobile ? 24 : 36} tick={{ fontSize: isMobile ? 9 : 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+            {!isMobile && <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />}
+            <Bar dataKey="critical" name="Critical" fill="hsl(var(--gh-red))" radius={[3, 3, 0, 0]} animationDuration={800} />
+            <Bar dataKey="warning" name="Warning" fill="hsl(var(--gh-orange))" radius={[3, 3, 0, 0]} animationDuration={800} />
+            <Bar dataKey="resolved" name="Resolved" fill="hsl(var(--gh-green))" radius={[3, 3, 0, 0]} animationDuration={800} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <section>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Recent Alerts</h3>
+        <div className="space-y-2.5">
+          {alerts.map((a, i) => (
+            <AlertCard key={i} {...a} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default DashboardScreen;
