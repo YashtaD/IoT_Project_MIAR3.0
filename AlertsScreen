@@ -1,0 +1,84 @@
+import { useState } from "react";
+import { AlertTriangle, CheckCircle, X, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const activeAlerts = [
+  { id: 1, message: "Temperature exceeded 40°C in Zone A", time: "Today, 2:00 PM", severity: "critical" as const },
+  { id: 2, message: "Humidity above 85% in Zone B", time: "Today, 1:15 PM", severity: "critical" as const },
+  { id: 3, message: "CO₂ rising in Zone A", time: "Today, 12:45 PM", severity: "warning" as const },
+  { id: 4, message: "Low light intensity in Zone C", time: "Today, 11:30 AM", severity: "warning" as const },
+  { id: 5, message: "Fan malfunction in Zone B", time: "Today, 10:00 AM", severity: "critical" as const },
+];
+
+const historyAlerts = [
+  { id: 6, message: "Temperature spike resolved — Zone A", time: "Yesterday, 4:00 PM", resolved: true },
+  { id: 7, message: "Humidity normalized — Zone B", time: "Yesterday, 2:30 PM", resolved: true },
+  { id: 8, message: "Vent auto-opened — Zone C", time: "Apr 10, 9:00 AM", resolved: true },
+  { id: 9, message: "Irrigation triggered — Zone A", time: "Apr 9, 6:15 PM", resolved: true },
+  { id: 10, message: "Pest alert dismissed — Zone B", time: "Apr 8, 3:00 PM", resolved: true },
+];
+
+type FilterType = "all" | "critical" | "warning";
+
+const AlertsScreen = () => {
+  const [filter, setFilter] = useState<FilterType>("all");
+  const filtered = filter === "all" ? activeAlerts : activeAlerts.filter((a) => a.severity === filter);
+
+  return (
+    <div className="space-y-6">
+      {/* Active */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Active Alerts</h2>
+          <div className="flex gap-1.5">
+            {(["all", "critical", "warning"] as FilterType[]).map((f) => (
+              <Button
+                key={f}
+                size="sm"
+                variant={filter === f ? "default" : "outline"}
+                className="text-xs h-7 px-2.5 capitalize"
+                onClick={() => setFilter(f)}
+              >
+                {f}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-2.5">
+          {filtered.map((a) => (
+            <div key={a.id} className={`flex items-start gap-3 rounded-lg p-3.5 border shadow-sm ${a.severity === "critical" ? "bg-gh-red-light border-gh-red/20" : "bg-gh-orange-light border-gh-orange/20"}`}>
+              <AlertTriangle className={`w-4 h-4 mt-0.5 shrink-0 ${a.severity === "critical" ? "text-gh-red" : "text-gh-orange"}`} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">{a.message}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{a.time}</p>
+              </div>
+              <div className="flex gap-1">
+                <button className="p-1 rounded hover:bg-muted" title="Snooze"><Clock className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                <button className="p-1 rounded hover:bg-muted" title="Dismiss"><X className="w-3.5 h-3.5 text-muted-foreground" /></button>
+              </div>
+            </div>
+          ))}
+          {filtered.length === 0 && <p className="text-sm text-muted-foreground text-center py-6">No alerts matching this filter.</p>}
+        </div>
+      </section>
+
+      {/* History */}
+      <section>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Alert History</h2>
+        <div className="space-y-2.5">
+          {historyAlerts.map((a) => (
+            <div key={a.id} className="flex items-start gap-3 rounded-lg p-3.5 border border-border bg-card shadow-sm">
+              <CheckCircle className="w-4 h-4 mt-0.5 shrink-0 text-gh-green" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">{a.message}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{a.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default AlertsScreen;
