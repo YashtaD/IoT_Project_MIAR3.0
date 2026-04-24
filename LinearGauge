@@ -1,0 +1,28 @@
+interface LinearGaugeProps {
+  value: number;
+  max: number;
+  label: string;
+  unit: string;
+  color: string;
+}
+
+const LinearGauge = ({ value, max, label, unit, color }: LinearGaugeProps) => {
+  const pct = Math.min((value / max) * 100, 100);
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between text-sm">
+        <span className="font-medium text-foreground">{label}</span>
+        <span className="font-semibold text-foreground">{value} {unit}</span>
+      </div>
+      <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: color }} />
+      </div>
+      <div className="flex justify-between text-[10px] text-muted-foreground">
+        <span>0</span>
+        <span>{max} {unit}</span>
+      </div>
+    </div>
+  );
+};
+
+export default LinearGauge;
