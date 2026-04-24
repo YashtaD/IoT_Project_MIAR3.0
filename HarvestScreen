@@ -1,0 +1,107 @@
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, Legend } from "recharts";
+import { Progress } from "@/components/ui/progress";
+import { Calendar } from "lucide-react";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+
+const yieldData = [
+  { week: "W1", Tomatoes: 120, Cucumbers: 80, Lettuce: 60 },
+  { week: "W2", Tomatoes: 150, Cucumbers: 95, Lettuce: 70 },
+  { week: "W3", Tomatoes: 130, Cucumbers: 110, Lettuce: 85 },
+  { week: "W4", Tomatoes: 170, Cucumbers: 100, Lettuce: 90 },
+];
+
+const growthStages = [
+  { crop: "Tomatoes", progress: 75, color: "hsl(var(--gh-red))" },
+  { crop: "Cucumbers", progress: 55, color: "hsl(var(--gh-green))" },
+  { crop: "Lettuce", progress: 90, color: "hsl(var(--gh-teal))" },
+];
+
+const forecasts = [
+  { crop: "Tomatoes", date: "Apr 28, 2026", qty: "~180 kg" },
+  { crop: "Cucumbers", date: "May 5, 2026", qty: "~120 kg" },
+  { crop: "Lettuce", date: "Apr 20, 2026", qty: "~95 kg" },
+];
+
+const HarvestScreen = () => (
+  <div className="space-y-6">
+    {/* Yield Chart */}
+    <section>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Weekly Yield (kg)</h2>
+      <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={yieldData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="week" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+            <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+            <Bar dataKey="Tomatoes" fill="hsl(var(--gh-red))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Cucumbers" fill="hsl(var(--gh-green))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Lettuce" fill="hsl(var(--gh-teal))" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
+
+    {/* Data Table */}
+    <section>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Yield Data</h2>
+      <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs">Week</TableHead>
+              <TableHead className="text-xs">Tomatoes (kg)</TableHead>
+              <TableHead className="text-xs">Cucumbers (kg)</TableHead>
+              <TableHead className="text-xs">Lettuce (kg)</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {yieldData.map((row) => (
+              <TableRow key={row.week}>
+                <TableCell className="text-xs font-medium">{row.week}</TableCell>
+                <TableCell className="text-xs">{row.Tomatoes}</TableCell>
+                <TableCell className="text-xs">{row.Cucumbers}</TableCell>
+                <TableCell className="text-xs">{row.Lettuce}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </section>
+
+    {/* Growth Stages */}
+    <section>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Growth Stages</h2>
+      <div className="bg-card rounded-lg p-4 border border-border shadow-sm space-y-4">
+        {growthStages.map((g) => (
+          <div key={g.crop}>
+            <div className="flex justify-between text-sm mb-1.5">
+              <span className="font-medium">{g.crop}</span>
+              <span className="text-muted-foreground">{g.progress}% to harvest</span>
+            </div>
+            <Progress value={g.progress} className="h-2.5" />
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* Forecast */}
+    <section>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Harvest Forecast</h2>
+      <div className="space-y-2.5">
+        {forecasts.map((f) => (
+          <div key={f.crop} className="bg-card rounded-lg p-4 border border-border shadow-sm flex items-center gap-3">
+            <Calendar className="w-5 h-5 text-secondary shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">{f.crop}</p>
+              <p className="text-xs text-muted-foreground">{f.date} · Est. {f.qty}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+);
+
+export default HarvestScreen;
