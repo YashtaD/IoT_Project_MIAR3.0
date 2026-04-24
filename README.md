@@ -52,12 +52,11 @@ Prérequis
    npm install
 
 3. Créez un fichier .env à la racine du projet et ajoutez vos clés API :
-
-  '''env
-  VITE_SUPABASE_PROJECT_ID=votre_supabase_project_id
-  VITE_SUPABASE_PUBLISHABLE_KEY=votre_supabase_publishable_key
-  VITE_SUPABASE_URL=votre_supabase_url
-  VITE_OPENWEATHERMAP_API_KEY=votre_openweathermap_api_key
+   '''env
+   VITE_SUPABASE_PROJECT_ID=votre_supabase_project_id
+   VITE_SUPABASE_PUBLISHABLE_KEY=votre_supabase_publishable_key
+   VITE_SUPABASE_URL=votre_supabase_url
+   VITE_OPENWEATHERMAP_API_KEY=votre_openweathermap_api_key
 
 
 5. Lancez l'application en mode développement :
