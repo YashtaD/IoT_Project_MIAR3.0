@@ -13,11 +13,11 @@ Code source : https://github.com/YashtaD/IoT_Project_MIAR3.0
 
 ## Fonctionnalités Principales
 
-``Tableau de bord interactif : Visualisation des données en temps réel.
-``Alertes intelligentes : Notifications pour les conditions anormales.
-``Analyse des tendances : Graphiques pour suivre l'évolution des paramètres.
-``Gestion des récoltes et des ravageurs : Outils pour diagnostiquer et traiter les problèmes des plantes.
-``Prévisions météorologiques : Intégration des données OpenWeatherMap pour anticiper les changements climatiques.
+ ``Tableau de bord interactif : Visualisation des données en temps réel.
+ ``Alertes intelligentes : Notifications pour les conditions anormales.
+ ``Analyse des tendances : Graphiques pour suivre l'évolution des paramètres.
+ ``Gestion des récoltes et des ravageurs : Outils pour diagnostiquer et traiter les problèmes des plantes.
+ ``Prévisions météorologiques : Intégration des données OpenWeatherMap pour anticiper les changements climatiques.
 
 ---
 
