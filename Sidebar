@@ -1,0 +1,59 @@
+import { Home, Leaf, Apple, Bug, AlertTriangle, FileText, Settings } from "lucide-react";
+
+const tabs = [
+  { label: "Dashboard", icon: Home },
+  { label: "Environment", icon: Leaf },
+  { label: "Harvest", icon: Apple },
+  { label: "Pest/Disease", icon: Bug },
+  { label: "Alerts", icon: AlertTriangle },
+  { label: "Reports", icon: FileText },
+  { label: "Settings", icon: Settings },
+];
+
+interface SidebarProps {
+  active: number;
+  onChange: (i: number) => void;
+  open: boolean;
+  onClose: () => void;
+}
+
+const Sidebar = ({ active, onChange, open, onClose }: SidebarProps) => (
+  <>
+    {/* Mobile overlay */}
+    {open && (
+      <div className="fixed inset-0 bg-foreground/20 z-40 md:hidden" onClick={onClose} />
+    )}
+    <aside
+      className={`fixed top-0 left-0 h-full w-60 bg-card border-r border-border z-50 transform transition-transform duration-200 md:translate-x-0 md:static md:z-auto ${
+        open ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      <div className="p-4 border-b border-border">
+        <h2 className="text-lg font-bold text-foreground">🌿 MyFarmTracker</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">Greenhouse Management</p>
+      </div>
+      <nav className="p-2 space-y-0.5">
+        {tabs.map((tab, i) => {
+          const Icon = tab.icon;
+          const isActive = active === i;
+          return (
+            <button
+              key={tab.label}
+              onClick={() => { onChange(i); onClose(); }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </nav>
+    </aside>
+  </>
+);
+
+export default Sidebar;
