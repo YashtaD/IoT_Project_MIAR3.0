@@ -1,0 +1,218 @@
+import { useState, useEffect, useCallback } from "react";
+import { Fan, Blinds, Wind, Droplets, Download, RefreshCw } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, Legend } from "recharts";
+import CircularGauge from "@/components/CircularGauge";
+import LinearGauge from "@/components/LinearGauge";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+
+function rand(min: number, max: number) {
+  return +(min + Math.random() * (max - min)).toFixed(1);
+}
+
+interface TrendPt {
+  time: string;
+  temp: number;
+  humidity: number;
+}
+
+function genTrend(): TrendPt[] {
+  const labels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "Now"];
+  const tempBase = [22, 21, 25, 32, 35, 29, 28];
+  const humBase = [55, 60, 50, 72, 78, 68, 75];
+  return labels.map((time, i) => ({
+    time,
+    temp: rand(tempBase[i] - 2, tempBase[i] + 2),
+    humidity: rand(humBase[i] - 4, humBase[i] + 4),
+  }));
+}
+
+const tempData = [
+  { time: "00", temp: 22 }, { time: "04", temp: 20 }, { time: "08", temp: 24 },
+  { time: "12", temp: 30 }, { time: "16", temp: 32 }, { time: "20", temp: 28 }, { time: "24", temp: 25 },
+];
+
+const weeklyData = [
+  { day: "Mon", temp: 28, humidity: 72, light: 1500 },
+  { day: "Tue", temp: 30, humidity: 68, light: 1600 },
+  { day: "Wed", temp: 26, humidity: 75, light: 1200 },
+  { day: "Thu", temp: 29, humidity: 70, light: 1400 },
+  { day: "Fri", temp: 32, humidity: 65, light: 1700 },
+  { day: "Sat", temp: 27, humidity: 73, light: 1300 },
+  { day: "Sun", temp: 28, humidity: 71, light: 1500 },
+];
+
+const EnvironmentScreen = () => {
+  const [tempThreshold, setTempThreshold] = useState([35]);
+  const [humThreshold, setHumThreshold] = useState([80]);
+  const [lightThreshold, setLightThreshold] = useState([1800]);
+  const [co2Threshold, setCo2Threshold] = useState([1500]);
+  const [trend, setTrend] = useState<TrendPt[]>(genTrend);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const refreshTrend = useCallback(() => {
+    setIsUpdating(true);
+    setTimeout(() => {
+      setTrend(genTrend());
+      setIsUpdating(false);
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(refreshTrend, 5000);
+    return () => clearInterval(id);
+  }, [refreshTrend]);
+
+  const humidity = 72;
+  const getHumColor = (v: number) => {
+    if (v > 80) return "hsl(var(--gh-red))";
+    if (v > 60) return "hsl(var(--gh-orange))";
+    return "hsl(var(--gh-green))";
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Gauges */}
+      <section>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Real-Time Metrics</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Temperature */}
+          <div className="bg-card rounded-lg p-4 border border-border shadow-sm flex flex-col items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Temperature</span>
+            <CircularGauge value={28} max={50} label="28°C" color="hsl(var(--gh-orange))" size={100} />
+            <div className="w-full h-16">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={tempData}>
+                  <XAxis dataKey="time" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis hide domain={[15, 38]} />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`${v}°C`, "Temp"]} />
+                  <Line type="monotone" dataKey="temp" stroke="hsl(var(--gh-orange))" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Humidity */}
+          <div className="bg-card rounded-lg p-4 border border-border shadow-sm flex flex-col items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Humidity</span>
+            <CircularGauge value={humidity} max={100} label={`${humidity}%`} color={getHumColor(humidity)} size={100} />
+          </div>
+
+          {/* Light */}
+          <div className="bg-card rounded-lg p-4 border border-border shadow-sm col-span-1">
+            <LinearGauge value={1500} max={2000} label="Light Intensity" unit="lux" color="hsl(var(--gh-yellow))" />
+          </div>
+
+          {/* CO2 */}
+          <div className="bg-card rounded-lg p-4 border border-border shadow-sm col-span-1">
+            <LinearGauge value={850} max={2000} label="CO₂ Level" unit="ppm" color="hsl(var(--gh-teal))" />
+          </div>
+        </div>
+      </section>
+
+      {/* Humidity & Temperature Trends */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Humidity &amp; Temperature Trends
+          </h2>
+          <button
+            onClick={refreshTrend}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+          >
+            <RefreshCw className={`w-3 h-3 ${isUpdating ? "animate-spin" : ""}`} />
+            {isUpdating ? "Updating…" : "Live"}
+            <span className="w-1.5 h-1.5 rounded-full bg-gh-green animate-pulse" />
+          </button>
+        </div>
+        <div className="bg-card rounded-lg border border-border p-4 shadow-sm overflow-hidden">
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={trend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" axisLine={false} tickLine={false} width={32} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+              <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+              <Line type="monotone" dataKey="humidity" name="Humidity %" stroke="hsl(var(--gh-blue))" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="temp" name="Temp °C" stroke="hsl(var(--gh-red))" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <span className="w-6 h-px bg-gh-red inline-block" /> Danger threshold: Humidity &gt; 70%
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Thresholds */}
+      <section>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Alert Thresholds</h2>
+        <div className="bg-card rounded-lg p-4 border border-border shadow-sm space-y-5">
+          <div>
+            <div className="flex justify-between text-sm mb-2"><span>Temperature</span><span className="font-semibold">{tempThreshold[0]}°C</span></div>
+            <Slider value={tempThreshold} onValueChange={setTempThreshold} min={20} max={50} step={1} />
+          </div>
+          <div>
+            <div className="flex justify-between text-sm mb-2"><span>Humidity</span><span className="font-semibold">{humThreshold[0]}%</span></div>
+            <Slider value={humThreshold} onValueChange={setHumThreshold} min={30} max={100} step={1} />
+          </div>
+          <div>
+            <div className="flex justify-between text-sm mb-2"><span>Light</span><span className="font-semibold">{lightThreshold[0]} lux</span></div>
+            <Slider value={lightThreshold} onValueChange={setLightThreshold} min={500} max={2000} step={50} />
+          </div>
+          <div>
+            <div className="flex justify-between text-sm mb-2"><span>CO₂</span><span className="font-semibold">{co2Threshold[0]} ppm</span></div>
+            <Slider value={co2Threshold} onValueChange={setCo2Threshold} min={400} max={2000} step={50} />
+          </div>
+        </div>
+      </section>
+
+      {/* Automation */}
+      <section>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Automation Controls</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "Turn on Fans", icon: Fan },
+            { label: "Activate Shading", icon: Blinds },
+            { label: "Open Vents", icon: Wind },
+            { label: "Run Irrigation", icon: Droplets },
+          ].map((btn) => {
+            const Icon = btn.icon;
+            return (
+              <Button key={btn.label} variant="outline" className="gap-2 h-12 shadow-sm hover:bg-secondary hover:text-secondary-foreground transition-colors">
+                <Icon className="w-4 h-4" /> {btn.label}
+              </Button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Historical Data */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Historical Data (7 Days)</h2>
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+            <Download className="w-3.5 h-3.5" /> Export
+          </Button>
+        </div>
+        <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={weeklyData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+              <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+              <Line type="monotone" dataKey="temp" name="Temp (°C)" stroke="hsl(var(--gh-orange))" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="humidity" name="Humidity (%)" stroke="hsl(var(--gh-blue))" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="light" name="Light (lux)" stroke="hsl(var(--gh-yellow))" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default EnvironmentScreen;
