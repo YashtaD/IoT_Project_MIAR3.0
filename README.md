@@ -48,10 +48,11 @@ Prérequis
    cd IoT_Project_MIAR3.0
 
 2. Installez les dépendances :
-  ```bash
-  npm install
+   ```bash
+   npm install
 
 3. Créez un fichier .env à la racine du projet et ajoutez vos clés API :
+
   '''env
   VITE_SUPABASE_PROJECT_ID=votre_supabase_project_id
   VITE_SUPABASE_PUBLISHABLE_KEY=votre_supabase_publishable_key
@@ -59,7 +60,7 @@ Prérequis
   VITE_OPENWEATHERMAP_API_KEY=votre_openweathermap_api_key
 
 
-4. Lancez l'application en mode développement :
+5. Lancez l'application en mode développement :
    '''bash
    npm run dev
 
