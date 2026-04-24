@@ -1,0 +1,42 @@
+import { useState } from "react";
+import AppBar from "@/components/AppBar";
+import BottomNav from "@/components/BottomNav";
+import Sidebar from "@/components/Sidebar";
+import DashboardScreen from "@/screens/DashboardScreen";
+import EnvironmentScreen from "@/screens/EnvironmentScreen";
+import HarvestScreen from "@/screens/HarvestScreen";
+import PestScreen from "@/screens/PestScreen";
+import AlertsScreen from "@/screens/AlertsScreen";
+import ReportsScreen from "@/screens/ReportsScreen";
+import SettingsScreen from "@/screens/SettingsScreen";
+
+const screens = [DashboardScreen, EnvironmentScreen, HarvestScreen, PestScreen, AlertsScreen, ReportsScreen, SettingsScreen];
+
+const Index = () => {
+  const [tab, setTab] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const Screen = screens[tab];
+
+  return (
+    <div className="min-h-screen gh-bg flex">
+      {/* Sidebar - visible on md+ (sticky on desktop/tablet) */}
+      <div className="hidden md:block sticky top-0 h-screen self-start">
+        <Sidebar active={tab} onChange={setTab} open={true} onClose={() => {}} />
+      </div>
+      {/* Mobile sidebar */}
+      <div className="md:hidden">
+        <Sidebar active={tab} onChange={setTab} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      </div>
+
+      <div className="flex-1 flex flex-col min-h-screen">
+        <AppBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} showMenu />
+        <main className="flex-1 px-4 md:px-6 py-5 pb-20 md:pb-5 max-w-6xl w-full mx-auto">
+          <Screen />
+        </main>
+        <BottomNav active={tab} onChange={setTab} />
+      </div>
+    </div>
+  );
+};
+
+export default Index;
