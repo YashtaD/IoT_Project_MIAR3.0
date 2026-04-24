@@ -1,0 +1,36 @@
+interface CircularGaugeProps {
+  value: number;
+  max: number;
+  label: string;
+  size?: number;
+  color?: string;
+}
+
+const CircularGauge = ({ value, max, label, size = 110, color }: CircularGaugeProps) => {
+  const percentage = (value / max) * 100;
+  const strokeWidth = 10;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percentage / 100) * circumference;
+
+  const getColor = () => {
+    if (color) return color;
+    if (percentage < 30) return "hsl(var(--gh-red))";
+    if (percentage < 60) return "hsl(var(--gh-orange))";
+    return "hsl(var(--gh-green))";
+  };
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--gauge-track))" strokeWidth={strokeWidth} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={getColor()} strokeWidth={strokeWidth}
+          strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
+          className="transition-all duration-1000 ease-out" />
+      </svg>
+      <span className="absolute text-lg font-bold text-foreground">{label}</span>
+    </div>
+  );
+};
+
+export default CircularGauge;
