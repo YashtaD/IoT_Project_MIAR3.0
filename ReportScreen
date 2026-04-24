@@ -1,0 +1,51 @@
+import { FileText, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const reports = [
+  { title: "Environmental Data Report", description: "Temperature, humidity, light, and CO₂ readings", icon: "🌡️" },
+  { title: "Yield & Harvest Report", description: "Weekly/monthly crop yield summary", icon: "🌾" },
+  { title: "Alert Summary Report", description: "Active and resolved alerts overview", icon: "⚠️" },
+  { title: "Pest & Disease Report", description: "Treatment logs and detection history", icon: "🐛" },
+];
+
+const ReportsScreen = () => (
+  <div className="space-y-6">
+    <div>
+      <h2 className="text-xl font-bold text-foreground">Reports</h2>
+      <p className="text-sm text-muted-foreground mt-1">Generate and export greenhouse reports</p>
+    </div>
+
+    {/* Date Range */}
+    <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+      <h3 className="text-sm font-semibold text-foreground mb-3">Date Range</h3>
+      <div className="flex flex-wrap gap-3">
+        <input type="date" defaultValue="2026-04-01" className="border border-border rounded-lg px-3 py-2 text-sm bg-background" />
+        <span className="self-center text-muted-foreground text-sm">to</span>
+        <input type="date" defaultValue="2026-04-13" className="border border-border rounded-lg px-3 py-2 text-sm bg-background" />
+      </div>
+    </div>
+
+    {/* Report Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {reports.map((r) => (
+        <div key={r.title} className="bg-card rounded-lg p-5 border border-border shadow-sm flex items-start gap-4">
+          <span className="text-2xl">{r.icon}</span>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-foreground">{r.title}</h3>
+            <p className="text-xs text-muted-foreground mt-1">{r.description}</p>
+            <div className="flex gap-2 mt-3">
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                <Download className="w-3.5 h-3.5" /> PDF
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                <FileText className="w-3.5 h-3.5" /> CSV
+              </Button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+export default ReportsScreen;
