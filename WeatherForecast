@@ -1,0 +1,126 @@
+import { useEffect, useState } from "react";
+import { CloudRain, RefreshCw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import sunnyIcon from "@/assets/weather-sunny.png";
+import partlyCloudyIcon from "@/assets/weather-partly-cloudy.png";
+import cloudyIcon from "@/assets/weather-cloudy.png";
+import rainyIcon from "@/assets/weather-rainy.png";
+import stormIcon from "@/assets/weather-storm.png";
+
+// Map OpenWeatherMap icon codes to our custom 3D weather icons
+const iconMap: Record<string, string> = {
+  "01d": sunnyIcon, "01n": sunnyIcon,
+  "02d": partlyCloudyIcon, "02n": partlyCloudyIcon,
+  "03d": cloudyIcon, "03n": cloudyIcon,
+  "04d": cloudyIcon, "04n": cloudyIcon,
+  "09d": rainyIcon, "09n": rainyIcon,
+  "10d": rainyIcon, "10n": rainyIcon,
+  "11d": stormIcon, "11n": stormIcon,
+  "13d": cloudyIcon, "13n": cloudyIcon,
+  "50d": cloudyIcon, "50n": cloudyIcon,
+};
+const getIcon = (code: string) => iconMap[code] ?? cloudyIcon;
+
+interface ForecastDay {
+  date: string;
+  min: number;
+  max: number;
+  icon: string;
+  description: string;
+}
+
+const dayName = (iso: string, idx: number) => {
+  if (idx === 0) return "Today";
+  return new Date(iso).toLocaleDateString("en-US", { weekday: "short" });
+};
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const WeatherForecast = () => {
+  const [forecast, setForecast] = useState<ForecastDay[]>([]);
+  const [city, setCity] = useState("Port Louis");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("weather-forecast", {
+        body: { city: "Port Louis,MU" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setForecast(data.forecast ?? []);
+      setCity(data.city ?? "Port Louis");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load forecast");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  return (
+    <div className="bg-card rounded-lg p-4 border border-border shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2 mb-3">
+        <CloudRain className="w-4 h-4 text-gh-blue" />
+        <h3 className="text-sm font-semibold text-foreground">
+          5-Day Forecast · {city}, Mauritius
+        </h3>
+        <button
+          onClick={load}
+          className="ml-auto text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+          aria-label="Refresh forecast"
+        >
+          <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
+          {loading ? "Loading…" : "Refresh"}
+        </button>
+      </div>
+
+      {error && (
+        <p className="text-xs text-gh-red bg-gh-red/10 rounded-md px-3 py-2">
+          {error}
+        </p>
+      )}
+
+      {loading && !forecast.length && (
+        <p className="text-xs text-muted-foreground">Loading weather forecast…</p>
+      )}
+
+      {!error && forecast.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {forecast.map((d, i) => (
+            <div
+              key={d.date}
+              className="flex flex-col items-center gap-1 bg-muted rounded-lg px-3 py-2.5 min-w-0"
+            >
+              <span className="text-xs font-medium text-muted-foreground">
+                {dayName(d.date, i)}
+              </span>
+              <img
+                src={getIcon(d.icon)}
+                alt={d.description}
+                loading="lazy"
+                width={512}
+                height={512}
+                className="w-16 h-16 object-contain"
+              />
+              <span className="text-sm font-bold text-foreground">
+                {d.max}° / {d.min}°
+              </span>
+              <span className="text-[10px] text-muted-foreground text-center leading-tight">
+                {cap(d.description)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default WeatherForecast;
