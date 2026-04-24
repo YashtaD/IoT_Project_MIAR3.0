@@ -1,0 +1,34 @@
+import { AlertTriangle, Thermometer, Droplets, Wind } from "lucide-react";
+
+interface AlertCardProps {
+  message: string;
+  timestamp: string;
+  severity: "critical" | "warning";
+}
+
+const getIcon = (message: string) => {
+  if (message.toLowerCase().includes("temp")) return Thermometer;
+  if (message.toLowerCase().includes("humid")) return Droplets;
+  if (message.toLowerCase().includes("co")) return Wind;
+  return AlertTriangle;
+};
+
+const AlertCard = ({ message, timestamp, severity }: AlertCardProps) => {
+  const Icon = getIcon(message);
+  return (
+    <div className={`flex items-start gap-3 rounded-lg p-3.5 border shadow-sm flex-wrap sm:flex-nowrap ${
+      severity === "critical" ? "bg-gh-red-light border-gh-red/20" : "bg-gh-orange-light border-gh-orange/20"
+    }`}>
+      <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${severity === "critical" ? "text-gh-red" : "text-gh-orange"}`} />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-foreground break-words">{message}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{timestamp}</p>
+      </div>
+      <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full shrink-0 ml-7 sm:ml-0 ${
+        severity === "critical" ? "bg-gh-red/10 text-gh-red" : "bg-gh-orange/10 text-gh-orange"
+      }`}>{severity}</span>
+    </div>
+  );
+};
+
+export default AlertCard;
